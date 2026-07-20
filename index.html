@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jon Dieringer</title>
+  <meta name="description" content="Jon Dieringer — tools I build for my hobbies, mostly measurement hardware and software for RC aircraft." />
+  <meta name="color-scheme" content="dark" />
+
+  <meta property="og:title" content="Jon Dieringer" />
+  <meta property="og:description" content="Tools I build for my hobbies, mostly measurement hardware and software for RC aircraft." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%90%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/site.css?v=2" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">jon<span class="dot">.</span>dieringer</a>
+      <nav class="links">
+        <a href="#work">work</a>
+        <a href="#about">about</a>
+        <a href="flash.html">flash</a>
+        <a href="#contact">contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>Jon Dieringer</h1>
+        <p class="lead">
+          I build tools for my hobbies — mostly measurement hardware and software for
+          RC aircraft. When something turns out to be useful, I share it.
+        </p>
+      </div>
+    </section>
+
+    <section id="work">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2>Work</h2>
+          <span class="rule"></span>
+        </div>
+
+        <div class="projects">
+          <article class="card has-media reveal">
+            <a class="stretch" href="projects/inclinometer.html" aria-label="Read the design notes for the Angle Gauge"></a>
+            <div class="card-body">
+            <div class="card-top">
+              <div class="card-title">
+                <div>
+                  <h3>Angle Gauge</h3>
+                  <span class="kind">F3A Setup Tools · differential inclinometer</span>
+                </div>
+              </div>
+              <span class="badge">Hardware · Firmware</span>
+            </div>
+            <p class="desc">
+              A multi-node angle gauge for rigging RC aircraft — incidence, decalage, control
+              throws, and differential. Two or more M5StickS3 nodes clip to different surfaces
+              and read at the same time, resolving to about 0.01°.
+            </p>
+            <ul class="highlights">
+              <li>Reads two surfaces at once, so the aircraft never needs to be leveled</li>
+              <li>ESP-NOW broadcast mesh — no pairing, no hub, no phone required</li>
+              <li>Long-press any node for a web console at <span class="mono">192.168.4.1</span></li>
+            </ul>
+            <div class="card-foot">
+              <div class="tags">
+                <span class="tag">ESP32-S3</span>
+                <span class="tag">BMI270</span>
+                <span class="tag">ESP-NOW</span>
+                <span class="tag">PlatformIO</span>
+              </div>
+              <span class="card-cta">Design notes →</span>
+            </div>
+            </div>
+            <div class="card-media">
+              <img src="assets/angle-gauge-card.jpg" width="960" height="640" loading="lazy"
+                   alt="An Angle Gauge node in a printed case, its screen reading plus 0.364 degrees, marked STABLE." />
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2>About</h2>
+          <span class="rule"></span>
+        </div>
+        <div class="about-grid reveal">
+          <div>
+            <p>
+              Most of what I build starts as a problem in one of my hobbies. Usually it's
+              something I want to measure properly, and the off-the-shelf option isn't accurate
+              enough or doesn't quite do the job.
+            </p>
+            <p>
+              That tends to pull in a bit of everything — sensors and firmware at one end, a
+              usable interface at the other, and some signal processing in between. I try to
+              build things that hold up in a workshop or at a flying field, not just on a bench.
+            </p>
+          </div>
+          <aside class="about-side">
+            <figure class="portrait">
+              <img src="assets/portrait.jpg" width="703" height="1000" loading="lazy"
+                   alt="Jon Dieringer at a flying field holding a large red and white F3A aerobatic aircraft." />
+              <figcaption>Where most of these projects start.</figcaption>
+            </figure>
+            <div class="stack-panel">
+            <h3>Embedded</h3>
+            <div class="chips">
+              <span class="chip">ESP32-S3</span>
+              <span class="chip">PlatformIO</span>
+              <span class="chip">Arduino</span>
+              <span class="chip">ESP-NOW</span>
+              <span class="chip">IMU / sensors</span>
+            </div>
+            <h3>Software</h3>
+            <div class="chips">
+              <span class="chip">Python</span>
+              <span class="chip">JavaScript</span>
+              <span class="chip">FastAPI</span>
+              <span class="chip">React</span>
+            </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="wrap">
+      <div class="contact">
+        <a href="mailto:jon@dieringerfamily.com">jon@dieringerfamily.com</a>
+      </div>
+      <div class="meta">
+        Jon Dieringer
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/site.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flash — Jon Dieringer</title>
+  <meta name="description" content="Flash RIG inclinometer firmware to an M5StickS3 from the browser." />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%90%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/site.css?v=2" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">jon<span class="dot">.</span>dieringer</a>
+      <nav class="links">
+        <a href="index.html#work">work</a>
+        <a href="index.html#about">about</a>
+        <a href="flash.html">flash</a>
+        <a href="index.html#contact">contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="post">
+    <div class="wrap">
+      <a class="back-link" href="index.html#work">← Back</a>
+
+      <header class="post-header">
+        <div class="post-kicker">Firmware</div>
+        <h1>Flash a node</h1>
+        <p class="post-summary flash-intro">
+          Install firmware over USB directly from this page — no toolchain needed. Pick a build to
+          see what hardware it expects, plug the device in, and flash.
+        </p>
+        <div class="browser-note flash-intro">
+          <span>
+            Requires a <b>Chromium-based desktop browser</b> (Chrome, Edge, or Opera) over HTTPS.
+            Firefox and Safari don't support Web Serial.
+          </span>
+        </div>
+      </header>
+
+      <div class="flash-layout">
+        <div>
+          <div class="fw-list-label">Builds</div>
+          <div class="fw-list" id="fw-list"></div>
+        </div>
+
+        <section class="fw-detail" id="fw-detail" aria-live="polite">
+          <div class="fw-empty">Select a build to continue.</div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="contact">
+        <a href="mailto:jon@dieringerfamily.com">jon@dieringerfamily.com</a>
+      </div>
+      <div class="meta">
+        Jon Dieringer
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+
+  <script>
+    // Firmware registry. To add a build: create firmware/<id>/manifest.json
+    // and add an entry here.
+    var FIRMWARE = [
+      {
+        id: 'angle-gauge',
+        name: 'Angle Gauge — node',
+        project: 'F3A Setup Tools',
+        chip: 'ESP32-S3',
+        version: '1.0.0',
+        desc: 'Complete node image: bootloader, partition table, app firmware, and the web console filesystem in one file. Flash the same build to every node — roles are claimed at boot.',
+        hardware: [
+          'M5StickS3 — ESP32-S3, 8 MB flash, 1.14" LCD, speaker',
+          'Bosch BMI270 IMU (built into the StickS3)',
+          'USB-C cable',
+          'A second node, if you want differential readings'
+        ],
+        notes: 'Everything installs in one pass — no separate filesystem upload. Saved settings survive: your role, zero, and thresholds persist across a reflash. If the port never appears, hold BtnB while tapping reset to force the ROM bootloader.',
+        manifest: 'firmware/angle-gauge/manifest.json'
+      }
+    ];
+
+    var listEl = document.getElementById('fw-list');
+    var detailEl = document.getElementById('fw-detail');
+
+    function esc(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    FIRMWARE.forEach(function (fw, i) {
+      var btn = document.createElement('button');
+      btn.className = 'fw-item';
+      btn.type = 'button';
+      btn.innerHTML =
+        '<div class="fw-item-top">' +
+          '<span class="fw-name">' + esc(fw.name) + '</span>' +
+          '<span class="fw-chip">' + esc(fw.chip) + '</span>' +
+        '</div>' +
+        '<div class="fw-sub">' + esc(fw.project) + ' · v' + esc(fw.version) + '</div>';
+      btn.addEventListener('click', function () { select(i); });
+      listEl.appendChild(btn);
+    });
+
+    function select(i) {
+      var fw = FIRMWARE[i];
+      Array.prototype.forEach.call(listEl.children, function (c, j) {
+        c.classList.toggle('active', j === i);
+      });
+
+      var hw = fw.hardware.map(function (h) { return '<li>' + esc(h) + '</li>'; }).join('');
+
+      detailEl.innerHTML =
+        '<h2>' + esc(fw.name) + '</h2>' +
+        '<div class="fw-project">' + esc(fw.project) + '</div>' +
+        '<p class="fw-desc">' + esc(fw.desc) + '</p>' +
+        '<div class="fw-metaline">' +
+          '<span class="k">Chip: <b>' + esc(fw.chip) + '</b></span>' +
+          '<span class="k">Version: <b>' + esc(fw.version) + '</b></span>' +
+        '</div>' +
+        '<div class="hw-head">What you need</div>' +
+        '<ul class="hw-list">' + hw + '</ul>' +
+        '<div class="fw-notes"><span class="note-label">Before you flash</span>' + esc(fw.notes) + '</div>' +
+        '<div class="flash-action" id="flash-action"></div>';
+
+      var action = document.getElementById('flash-action');
+      var installBtn = document.createElement('esp-web-install-button');
+      installBtn.setAttribute('manifest', fw.manifest);
+      installBtn.innerHTML =
+        '<button class="flash-btn" slot="activate">Flash ' + esc(fw.name) + '</button>' +
+        '<span slot="unsupported" class="fw-unsupported">This browser can\'t flash — use Chrome, Edge, or Opera on desktop.</span>' +
+        '<span slot="not-allowed" class="fw-notallowed">Flashing requires HTTPS or localhost.</span>';
+      action.appendChild(installBtn);
+
+      var status = document.createElement('span');
+      status.className = 'fw-status';
+      status.innerHTML = '<span class="led"></span> checking…';
+      action.appendChild(status);
+
+      checkAvailability(fw, status);
+    }
+
+    // Confirm the binaries referenced by the manifest are actually present.
+    function checkAvailability(fw, statusEl) {
+      var dir = fw.manifest.replace(/[^/]+$/, '');
+      fetch(fw.manifest, { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('manifest'); return r.json(); })
+        .then(function (m) {
+          var parts = (m.builds && m.builds[0] && m.builds[0].parts) || [];
+          if (!parts.length) throw new Error('parts');
+          return Promise.all(parts.map(function (p) {
+            return fetch(dir + p.path, { method: 'HEAD', cache: 'no-store' });
+          }));
+        })
+        .then(function (rs) {
+          if (rs.every(function (r) { return r.ok; })) {
+            statusEl.className = 'fw-status ok';
+            statusEl.innerHTML = '<span class="led"></span> Ready';
+          } else {
+            statusEl.className = 'fw-status pending';
+            statusEl.innerHTML = '<span class="led"></span> Binary missing';
+          }
+        })
+        .catch(function () {
+          statusEl.className = 'fw-status';
+          statusEl.innerHTML = '<span class="led"></span> Needs a live server to verify';
+        });
+    }
+
+    // Select the only build by default; support #id deep links.
+    (function () {
+      var hash = (location.hash || '').replace('#', '');
+      var idx = FIRMWARE.findIndex(function (f) { return f.id === hash; });
+      select(idx >= 0 ? idx : 0);
+    })();
+  </script>
+</body>
+</html>

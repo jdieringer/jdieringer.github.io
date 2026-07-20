@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angle Gauge — Design Notes · Jon Dieringer</title>
+  <meta name="description" content="Design notes on the F3A Setup Tools Angle Gauge, a wireless multi-node differential inclinometer for rigging RC aircraft, built on M5StickS3 nodes." />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%90%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="../assets/site.css?v=2" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../index.html">jon<span class="dot">.</span>dieringer</a>
+      <nav class="links">
+        <a href="../index.html#work">work</a>
+        <a href="../index.html#about">about</a>
+        <a href="../flash.html">flash</a>
+        <a href="../index.html#contact">contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="post">
+    <div class="wrap post-wrap">
+      <a class="back-link" href="../index.html#work">← Back</a>
+
+      <header class="post-header">
+        <div class="post-kicker">Design notes · F3A Setup Tools</div>
+        <h1>Angle Gauge</h1>
+        <p class="post-summary">
+          A wireless multi-node angle gauge for rigging RC aircraft. Two or more nodes clip to
+          different surfaces and are read at the same time, measuring the angle between them rather
+          than each one against the ground.
+        </p>
+        <div class="post-meta">
+          <span>M5StickS3 · ESP32-S3 · BMI270</span>
+          <span class="dot-sep">·</span>
+          <span>PlatformIO / Arduino</span>
+        </div>
+        <div class="post-tags">
+          <span class="chip">ESP32-S3</span>
+          <span class="chip">BMI270</span>
+          <span class="chip">ESP-NOW</span>
+          <span class="chip">LittleFS</span>
+          <span class="chip">M5Unified</span>
+        </div>
+      </header>
+
+      <article class="post-body">
+
+        <figure class="figure shot">
+          <img src="../assets/angle-gauge.jpg" width="1800" height="1351"
+               alt="An Angle Gauge node in a printed case, screen reading plus 0.364 degrees, marked STABLE." />
+          <figcaption>
+            A node showing a settled reading: role A, state STABLE, +0.364°, with σ 0.004° and
+            54 °C in the footer.
+          </figcaption>
+        </figure>
+
+        <h2>What it does</h2>
+        <p>
+          Rigging an RC aircraft means setting angles: wing incidence, decalage between wing and
+          stabilizer, control-surface throws and their differential, washout, dihedral. All of these
+          are really the angle between two things, not the angle of one thing.
+        </p>
+        <p>
+          The Angle Gauge is a set of small nodes that each measure their own tilt and broadcast it. Clip one to
+          the wing and one to the stabilizer and you get the difference directly. It resolves to
+          roughly 0.01°. For comparison, an analog Robart meter reads to 0.125° and digital angle
+          cubes are typically ±0.2°.
+        </p>
+        <p>
+          If you want to try it, the firmware is on this site:
+          <a href="../flash.html">flash a node from your browser</a>.
+        </p>
+
+        <h2>2021 — where it started</h2>
+        <p>
+          The commercial angle gauges available at the time had two limitations: they were heavy
+          enough to deflect the surface being measured, and their accuracy was about 0.2°. That is
+          adequate for setting a control throw. It is not adequate for decalage, where differences of
+          a tenth of a degree matter.
+        </p>
+        <p>
+          The first version used an M5StickC, chosen because it already included a battery, a screen,
+          and a built-in IMU.
+        </p>
+        <p>
+          The built-in IMU was not accurate enough. The figures below show why.
+        </p>
+
+        <div class="note">
+          <span class="note-label">Converting tilt to acceleration</span>
+          Tilt from an accelerometer is a measurement of gravity. Near level, the two are related by
+          a single constant: <strong>1 g of sensed acceleration corresponds to 57.3° of tilt</strong>.
+          A target of <strong>0.01° is therefore 175 µg</strong> of acceleration. The sensor
+          specifications below are compared against that figure.
+        </div>
+
+        <p>
+          The M5StickC carries an InvenSense <strong>MPU-6886</strong>. The part I moved to was an
+          Analog Devices <strong>ADXL355</strong> — a dedicated low-noise, low-drift accelerometer
+          rather than a general-purpose motion IMU.
+        </p>
+
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead>
+              <tr><th>At ±2 g</th><th>MPU-6886 (built in)</th><th>ADXL355</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Resolution</td>
+                <td>16-bit — 61 µg/LSB</td>
+                <td>20-bit — 3.8 µg/LSB</td>
+                <td>16×</td>
+              </tr>
+              <tr>
+                <td>…as tilt</td>
+                <td>0.0035° per count</td>
+                <td>0.00022° per count</td>
+                <td>16×</td>
+              </tr>
+              <tr>
+                <td>Noise density</td>
+                <td>100 µg/√Hz (170 max)</td>
+                <td>22.5 µg/√Hz</td>
+                <td>4.4×</td>
+              </tr>
+              <tr>
+                <td>…as tilt at 1 Hz</td>
+                <td>0.0057° RMS</td>
+                <td>0.0013° RMS</td>
+                <td>4.4×</td>
+              </tr>
+              <tr>
+                <td>Offset drift</td>
+                <td>±0.5 mg/°C — 0.029°/°C</td>
+                <td>±0.1 mg/°C — 0.0057°/°C</td>
+                <td>5×</td>
+              </tr>
+              <tr>
+                <td>Nonlinearity</td>
+                <td>±0.3% typ</td>
+                <td>0.1%</td>
+                <td>3×</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <strong>Offset drift is the specification that mattered.</strong> The MPU-6886's zero-g
+          point moves ±0.5 mg/°C, or 0.029° of apparent tilt per °C. The full 0.01° budget is
+          consumed by 0.35 °C of temperature change. The ADXL355 allows about 1.75 °C for the same
+          budget.
+        </p>
+        <p>
+          <strong>Resolution</strong> appeared to be a second limitation, but is not one. Sixteen
+          bits across ±2 g give one count per 61 µg, or 0.0035° — about three counts across the
+          0.01° target, against 46 counts for the ADXL355's twenty bits. Because the sensor's noise
+          is larger than one count, it dithers the quantizer, and averaging recovers resolution below
+          a single LSB.
+        </p>
+        <p>
+          Noise is not a limit either, for the same reason: it averages down as 1/√N, so a few
+          seconds of stillness reduces it as far as required. Offset drift does not average down, and
+          averaging over a longer window increases the error it contributes.
+        </p>
+
+        <figure class="figure shot">
+          <img src="../assets/gen-2021.jpg" width="1024" height="768" loading="lazy"
+               alt="The 2021 prototype: an M5StickC in its orange case with an external accelerometer board wired on top, screen reading minus 15.809 degrees." />
+          <figcaption>
+            January 2021 — an M5StickC with the ADXL355 wired on top, reading −15.809°. The battery
+            beside it gives the scale.
+          </figcaption>
+        </figure>
+
+        <p>
+          The prototype met the accuracy target. It was a single node showing a single absolute
+          angle, so it could not measure the angle between two surfaces.
+        </p>
+        <h2>2024 — making it buildable by others</h2>
+        <p>
+          The next version kept the M5StickC and the ADXL355 and addressed a different problem:
+          making the design something other people could assemble.
+        </p>
+        <p>
+          It was not much easier to build. It still required a significant amount of external wiring
+          and a 3D-printed enclosure. I built a small number and handed them out to people in the
+          community for feedback.
+        </p>
+        <p>
+          The feedback was positive and people asked for units, but each one had to be assembled by
+          hand. At that point the limiting factor was no longer accuracy but reproducibility.
+        </p>
+
+        <figure class="figure shot">
+          <img src="../assets/gen-2024.jpg" width="948" height="828" loading="lazy"
+               alt="Two 2024-generation gauges in printed red mounts clipped to a rigging jig, each showing absolute and relative angle readings." />
+          <figcaption>
+            June 2024 — two gauges in printed mounts on a rigging jig, each showing absolute and
+            relative readings. The units did not communicate with each other, so the difference
+            between them was worked out by hand.
+          </figcaption>
+        </figure>
+
+        <h2>2025 — the WaveShare platform</h2>
+        <p>
+          Since the external accelerometer was the main assembly burden, the next step was to look for
+          a development platform whose built-in IMU was accurate enough to use directly. That led to a
+          WaveShare board carrying a QST <strong>QMI8658</strong>.
+        </p>
+        <p>
+          Compared with the part it would replace:
+        </p>
+
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead>
+              <tr><th>At ±2 g</th><th>ADXL355 (external)</th><th>QMI8658A (built in)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Resolution</td><td>20-bit — 3.8 µg/LSB</td><td>16-bit — 61 µg/LSB</td></tr>
+              <tr><td>Noise density</td><td>22.5 µg/√Hz</td><td>150 µg/√Hz</td></tr>
+              <tr><td>…as tilt at 1 Hz</td><td>0.0013° RMS</td><td>0.0086° RMS</td></tr>
+              <tr><td>…after a few seconds</td><td>~0.0004°</td><td>~0.003°</td></tr>
+              <tr><td>Offset drift</td><td>±0.1 mg/°C — 0.0057°/°C</td><td>±1 mg/°C — 0.057°/°C</td></tr>
+              <tr><td>Nonlinearity</td><td>0.1%</td><td>±0.75%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The QMI8658 is worse than the ADXL355 on every specification listed: 6.7× the noise
+          density, 10× the offset drift, and four fewer bits of resolution. In use it was still
+          sufficient. The ADXL355 build was stable to about 0.001°; the QMI8658 varied by a few
+          thousandths of a degree. Against a 0.01° target, that leaves margin.
+        </p>
+        <div class="note">
+          <span class="note-label">Comparison with the 2021 part</span>
+          The QMI8658 is also worse than the MPU-6886 that was rejected in 2021, on both noise density
+          (150 against 100 µg/√Hz) and offset drift (±1 against ±0.5 mg/°C). The change between 2021
+          and 2025 was therefore not the sensor. It was the averaging, and the practice of zeroing the
+          sensor shortly before taking a reading. One caveat: the QMI8658's drift figure is specified
+          at board level and the MPU-6886's is not, which favours the MPU-6886 in this comparison.
+        </div>
+
+        <figure class="figure shot">
+          <img src="../assets/gen-2025.jpg" width="768" height="1024" loading="lazy"
+               alt="The 2025 WaveShare-based gauge showing a two-axis readout, a bubble-level bar, and a signal-quality indicator reading EXCELLENT." />
+          <figcaption>
+            August 2025 — two axes, a bubble-level bar, and a signal-quality readout showing per-axis
+            sigma and a sample count.
+          </figcaption>
+        </figure>
+
+        <p>
+          The platform had drawbacks. It is a touchscreen development board, larger and heavier than
+          the application requires, and it has no battery, so it still needed a custom enclosure and a
+          battery added to it.
+        </p>
+        <p>
+          This generation is where the rest of the system started. Multiple nodes were made to
+          communicate using ESP-NOW and BLE, and the nodes first served a web page that could be
+          opened on a phone. Both carried over to the current version.
+        </p>
+
+        <h2>2026 — M5StickS3</h2>
+        <p>
+          In January 2026, M5 released the M5StickS3. It has the battery, screen, and case size of the
+          original StickC, with a Bosch <strong>BMI270</strong> in place of the MPU-6886.
+        </p>
+        <p>
+          Offset drift for all four parts:
+        </p>
+
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead>
+              <tr><th>Part</th><th>Used in</th><th>Offset drift</th><th>…as tilt</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>MPU-6886</td><td>2021, rejected</td><td>±0.5 mg/°C</td><td>0.029°/°C</td></tr>
+              <tr><td>ADXL355</td><td>2021–24, external</td><td>±0.1 mg/°C</td><td>0.0057°/°C</td></tr>
+              <tr><td>QMI8658A</td><td>2025, WaveShare</td><td>±1 mg/°C</td><td>0.057°/°C</td></tr>
+              <tr><td>BMI270</td><td>2026, current</td><td>±0.25 mg/°C</td><td>0.014°/°C</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          The BMI270's noise density is similar to the QMI8658's — 160 against 150 µg/√Hz — and its
+          offset drift is four times lower, and twice as low as the MPU-6886's. With the re-zeroing
+          workflow described below, that is sufficient, and no external accelerometer is required.
+        </p>
+        <p>
+          Version 1.0 uses the M5StickS3 with no added hardware. The firmware can be installed from
+          this site: <a href="../flash.html">flash a node from your browser</a>. The rest of these
+          notes describe how that version works.
+        </p>
+
+        <h2>Measuring the angle</h2>
+        <p>
+          Tilt comes from the accelerometer only — an <code>atan2</code> of two axes, using gravity as
+          the reference. No gyro integration, so there's nothing to drift over a session.
+        </p>
+        <p>
+          A useful property of that approach is constant angular sensitivity: the resolution is the
+          same at every angle. A 40° control throw resolves just as well as a 0.5° incidence setting,
+          which matters because the same tool has to do both jobs.
+        </p>
+
+        <h2>Getting to 0.01°</h2>
+        <p>
+          A single accelerometer sample is far noisier than 0.01°, so the number has to come from
+          averaging. Averaging introduces lag: a heavily filtered reading is precise but takes
+          seconds to catch up, so the display trails the surface while it is being moved.
+        </p>
+        <p>
+          The compromise is to switch behavior based on whether the surface is moving:
+        </p>
+        <ul>
+          <li><strong>Moving</strong> — a fast filter (τ ≈ 0.1 s) drives the display, so it follows the movement.</li>
+          <li><strong>Stopped</strong> — the accumulator resets and starts averaging fresh samples. Precision improves as 1/√N with no settling lag, because nothing stale is carried over: roughly 0.005° after 2 seconds, 0.002° after 8.</li>
+        </ul>
+        <p>
+          Averaging is capped near the Allan-deviation minimum. Past that point drift starts to
+          dominate and longer averaging makes the reading worse, not better. A
+          <code>MOVING → SETTLING → STABLE</code> state machine drives the display, the auto-capture,
+          and the audio chirps.
+        </p>
+
+        <div class="note">
+          <span class="note-label">Why a low-drift sensor is not required</span>
+          At 0.01°, thermal drift is the dominant error term: the BMI270 moves about 0.014° per °C.
+          Every measurement is relative, and the nodes are zeroed minutes before a reading is taken,
+          so only the drift accumulated between zeroing and measuring applies. That is why a part such
+          as the Murata SCL3400 is not necessary here.
+        </div>
+
+        <h2>Why two nodes</h2>
+        <p>
+          Each node measures its tilt against gravity, so each reading includes however the fuselage
+          happens to be sitting. Subtract two of them and that shared component cancels out — it's
+          common-mode. The practical consequence is that <strong>the aircraft does not need to be
+          leveled</strong> before measuring.
+        </p>
+        <p>
+          What doesn't cancel is each node's own fixed offset, and in differential work that becomes
+          the dominant error. A pair-zero step handles it: sit both nodes on one flat surface and
+          zero them together, which measures the offset between them and removes it.
+        </p>
+
+        <div class="figure">
+          <pre>node A on the wing        ──►  tilt_A = wing angle + fuselage attitude
+node B on the stabilizer  ──►  tilt_B = stab angle + fuselage attitude
+                               ─────────────────────────────────────────
+                     A − B  =  decalage          (attitude cancels)</pre>
+          <figcaption>Subtracting two gravity-referenced nodes removes the aircraft's attitude.</figcaption>
+        </div>
+
+        <h2>How the nodes talk</h2>
+        <p>
+          The nodes use an ESP-NOW broadcast mesh. Each one beacons its angle, sigma, state, and
+          temperature at 10 Hz to the broadcast address and passively listens for everyone else.
+          There's no pairing, no hub, and no connection state to manage — any node can display the
+          delta against any other, and no phone needs to be present.
+        </p>
+        <p>
+          Roles are sticky. The first node to boot claims A, the next claims B, and so on, with the
+          choice persisted to NVS. Without this, a brownout mid-session could renumber the sensors
+          and change which surface each reading refers to.
+          Collisions are settled by MAC address, and the startup listen window is 2.5 s and
+          non-blocking.
+        </p>
+
+        <h2>The web console</h2>
+        <p>
+          Long-pressing any node turns it into an access point with a web server at
+          <code>192.168.4.1</code>, serving a single self-contained HTML file from LittleFS. It's
+          on-demand rather than always-on.
+        </p>
+        <p>
+          Captive-portal probes are answered with success pages, which keeps iOS in Safari rather
+          than the captive-portal browser and allows <em>Add to Home Screen</em>. A BLE web app was
+          the alternative, but Web Bluetooth is not available on iOS, so SoftAP was used instead.
+        </p>
+        <p>
+          It settled into two views. <strong>Measure</strong> has three modes: <em>Live</em> shows the
+          absolute tilt of every connected sensor, <em>Tare</em> zeroes them, and <em>Δ Datum</em>
+          reads the difference against a chosen reference. Most rigging measurements are a
+          combination of those three, so an earlier and larger menu of named measurements was reduced
+          to them.
+        </p>
+        <div class="figure shot">
+          <img src="../assets/angle-gauge-console.jpg" width="880" height="689"
+               alt="The Angle Gauge web console showing Live mode with sensor A stable at plus 0.395 degrees." />
+          <figcaption>The console in Live mode — same node, same reading, from a phone.</figcaption>
+        </div>
+        <p>
+          <strong>Setup</strong> holds the less frequently used controls. Calibration has
+          <em>Match 0</em>, which zeroes every unit together — the pair-zero step described above.
+          Below it are the thresholds that drive the state
+          machine: how much movement counts as motion, how long a surface must hold still before it
+          counts as settled, and the cap on how long to average. Those live on the node itself rather
+          than in the browser, so a node behaves the same whether or not a phone is present.
+        </p>
+
+        <h2>Hardware</h2>
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead><tr><th>Part</th><th>Detail</th></tr></thead>
+            <tbody>
+              <tr><td>Node</td><td>M5StickS3 — ESP32-S3 dual-core, 1.14" LCD, speaker, 250 mAh LiPo</td></tr>
+              <tr><td>IMU</td><td>Bosch BMI270, 6-axis (accelerometer used for tilt)</td></tr>
+              <tr><td>Fleet</td><td>Two or more nodes, read simultaneously</td></tr>
+              <tr><td>Link</td><td>ESP-NOW broadcast, 10 Hz</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Alternatives considered and set aside: the QMI8658, which is noisier; the Arduino Nesso N1,
+          which carries the same BMI270 but is single-core C6 and costs more; and the Murata SCL3400,
+          a lower-drift sensor that the re-zeroed relative workflow makes unnecessary.
+        </p>
+
+        <h2>Practical notes</h2>
+        <ul>
+          <li>Everything is in degrees.</li>
+          <li>Zero shortly before measuring. After a cold power-on, allow about 15 minutes of warm-up.</li>
+          <li>A node weighs about 20 g, which is enough to deflect a light surface. A ballast test will show whether it does.</li>
+          <li>Incidence accuracy is limited by the chord-line fixture, not the electronics.</li>
+        </ul>
+
+        <h2>Packaging</h2>
+        <p>
+          A node needs two things installed: the app firmware and the LittleFS image holding the web
+          console. If those are flashed as separate steps, it is possible to flash the app and omit
+          the filesystem, in which case the console returns 404.
+        </p>
+        <p>
+          The build script therefore merges the bootloader, partition table, app, and filesystem into
+          a single 8 MB image written at offset <code>0x0</code>. The same image works with a browser
+          flasher or with esptool.
+        </p>
+        <p>
+          Reflashing deliberately leaves NVS alone, so a node keeps its role, zero, and thresholds
+          across an update rather than needing to be set up again.
+        </p>
+
+        <h2>Where it stands</h2>
+        <p>
+          The firmware and console are working and in use. A round of review hardening was applied
+          afterwards: edge-latched buttons so a long press fires once and short actions land on
+          release, routes registered a single time, a cross-core snapshot taken under a mutex for the
+          web task, and the IMU temperature read at 1 Hz.
+        </p>
+        <p>
+          One item is outstanding: a two-hour static log to compute the Allan deviation, which would
+          confirm the noise floor in the enclosure and set the averaging cap from measurement rather
+          than estimate.
+        </p>
+
+        <div class="post-foot">
+          <a class="back-link" href="../index.html#work" style="margin:0">← Back</a>
+          <div class="links">
+            <a class="link-btn" href="../flash.html">Flash a node</a>
+            <a class="link-btn" href="#" aria-disabled="true" title="Add repo URL">Repo</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script src="../assets/site.js?v=2"></script>
+</body>
+</html>
