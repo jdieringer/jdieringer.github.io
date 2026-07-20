@@ -1,0 +1,18 @@
+# Original camera/screenshot files. Only the web-optimized versions in
+# assets/ are deployed — see README.md.
+_source-images/
+
+# Claude Code local config
+.claude/
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
