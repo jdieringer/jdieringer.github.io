@@ -356,6 +356,33 @@ section { padding: 48px 0; }
 }
 .cta-btn:hover { text-decoration: none; filter: brightness(1.08); }
 
+/* ---------- Buy-me-a-coffee ---------- */
+.coffee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 22px;
+  border: 1px dashed var(--line-soft);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 30px 0 0;
+}
+.coffee-copy { min-width: 240px; font-size: 14px; color: var(--text-dim); line-height: 1.55; }
+.coffee-copy strong { color: var(--text); }
+.coffee-btn {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 11px 20px;
+  border-radius: 9px;
+  border: 1px solid var(--line-soft);
+  color: var(--text);
+  background: var(--bg-soft);
+  white-space: nowrap;
+}
+.coffee-btn:hover { border-color: var(--warn); color: var(--warn); text-decoration: none; }
+
 /* ---------- Footer ---------- */
 footer {
   border-top: 1px solid var(--line);
