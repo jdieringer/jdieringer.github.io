@@ -7,9 +7,9 @@
   --text:      #e6e8ec;
   --text-dim:  #9aa1aa;
   --text-mute: #6b7179;
-  --accent:    #e11a2b;  /* Ohio State scarlet */
+  --accent:    #f2555f;  /* scarlet, softened for legibility on dark */
   --accent-2:  #c2c8d0;  /* Ohio State gray */
-  --accent-text: #f2555f; /* lighter scarlet, tuned for text legibility on dark (5.7:1) */
+  --accent-text: var(--accent); /* text red == brand red */
   --warn:      #f7b955;
   --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
@@ -84,7 +84,7 @@ header.nav .wrap {
 }
 .brand:hover { text-decoration: none; }
 .brand .dot { color: var(--accent-text); }
-nav.links { display: flex; gap: 26px; }
+nav.links { display: flex; align-items: center; gap: 26px; }
 nav.links a {
   color: var(--text-dim);
   font-size: 14px;
@@ -92,6 +92,78 @@ nav.links a {
 }
 nav.links a:hover { color: var(--accent-text); text-decoration: none; }
 @media (max-width: 620px) { nav.links { display: none; } }
+
+/* ---------- Nav dropdown (project guides) ---------- */
+.nav-dropdown { position: relative; display: inline-flex; align-items: center; }
+/* invisible bridge so the pointer can cross the gap to the menu without it closing */
+.nav-dropdown::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: -14px;
+  right: -14px;
+  height: 16px;
+}
+.nav-drop-toggle {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.nav-drop-caret { font-size: 9px; transition: transform .16s ease; }
+.nav-dropdown:hover .nav-drop-toggle,
+.nav-dropdown:focus-within .nav-drop-toggle { color: var(--accent-text); }
+.nav-dropdown:hover .nav-drop-caret,
+.nav-dropdown:focus-within .nav-drop-caret { transform: rotate(180deg); }
+
+.nav-drop-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 190px;
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity .16s ease, transform .16s ease, visibility .16s;
+  z-index: 30;
+}
+.nav-dropdown:hover .nav-drop-menu,
+.nav-dropdown:focus-within .nav-drop-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.nav-drop-menu a {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: var(--text-dim);
+  padding: 9px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.nav-drop-menu a:hover { color: var(--text); background: var(--bg-soft); text-decoration: none; }
+.nav-drop-menu .drop-soon {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-mute);
+  padding: 8px 12px 4px;
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
 
 /* ---------- Hero ---------- */
 .hero { padding: 72px 0 44px; }
@@ -110,13 +182,13 @@ nav.links a:hover { color: var(--accent-text); text-decoration: none; }
 .status .pulse {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(225, 26, 43, 0.6);
+  box-shadow: 0 0 0 0 rgba(242, 85, 95, 0.6);
   animation: pulse 2.4s infinite;
 }
 @keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(225,26,43,0.5); }
-  70%  { box-shadow: 0 0 0 7px rgba(225,26,43,0); }
-  100% { box-shadow: 0 0 0 0 rgba(225,26,43,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(242,85,95,0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(242,85,95,0); }
+  100% { box-shadow: 0 0 0 0 rgba(242,85,95,0); }
 }
 .hero h1 {
   font-size: clamp(32px, 5.2vw, 46px);
@@ -149,7 +221,7 @@ nav.links a:hover { color: var(--accent-text); text-decoration: none; }
   border-color: var(--accent);
   font-weight: 600;
 }
-.btn.primary:hover { background: #f4283a; }
+.btn.primary:hover { background: #e8444f; }
 .btn.ghost:hover { border-color: var(--accent); color: var(--accent-text); }
 
 /* ---------- Section headings ---------- */
@@ -887,7 +959,7 @@ a.link-btn:hover { border-color: var(--accent); color: var(--accent-text); text-
   cursor: pointer;
   transition: background .15s, transform .1s;
 }
-.flash-btn:hover { background: #f4283a; transform: translateY(-1px); }
+.flash-btn:hover { background: #e8444f; transform: translateY(-1px); }
 .fw-status {
   font-family: var(--mono); font-size: 12px;
   display: inline-flex; align-items: center; gap: 7px; color: var(--text-mute);
