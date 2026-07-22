@@ -9,6 +9,7 @@
   --text-mute: #6b7179;
   --accent:    #e11a2b;  /* Ohio State scarlet */
   --accent-2:  #c2c8d0;  /* Ohio State gray */
+  --accent-text: #f2555f; /* lighter scarlet, tuned for text legibility on dark (5.7:1) */
   --warn:      #f7b955;
   --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
@@ -82,14 +83,14 @@ header.nav .wrap {
   color: var(--text);
 }
 .brand:hover { text-decoration: none; }
-.brand .dot { color: var(--accent); }
+.brand .dot { color: var(--accent-text); }
 nav.links { display: flex; gap: 26px; }
 nav.links a {
   color: var(--text-dim);
   font-size: 14px;
   font-family: var(--mono);
 }
-nav.links a:hover { color: var(--accent); text-decoration: none; }
+nav.links a:hover { color: var(--accent-text); text-decoration: none; }
 @media (max-width: 620px) { nav.links { display: none; } }
 
 /* ---------- Hero ---------- */
@@ -124,7 +125,7 @@ nav.links a:hover { color: var(--accent); text-decoration: none; }
   letter-spacing: -0.03em;
   font-weight: 700;
 }
-.hero h1 .accent { color: var(--accent); }
+.hero h1 .accent { color: var(--accent-text); }
 .hero p.lead {
   font-size: clamp(17px, 2.4vw, 20px);
   color: var(--text-dim);
@@ -149,7 +150,7 @@ nav.links a:hover { color: var(--accent); text-decoration: none; }
   font-weight: 600;
 }
 .btn.primary:hover { background: #f4283a; }
-.btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn.ghost:hover { border-color: var(--accent); color: var(--accent-text); }
 
 /* ---------- Section headings ---------- */
 section { padding: 48px 0; }
@@ -162,7 +163,7 @@ section { padding: 48px 0; }
 .sec-head .idx {
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .sec-head h2 {
   font-size: clamp(24px, 4vw, 30px);
@@ -261,7 +262,7 @@ section { padding: 48px 0; }
 .card-title .kind {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .badge {
   font-family: var(--mono);
@@ -291,7 +292,7 @@ section { padding: 48px 0; }
   content: "▸";
   position: absolute;
   left: 0;
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 12px;
 }
 
@@ -315,7 +316,7 @@ section { padding: 48px 0; }
 .card-cta {
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--accent);
+  color: var(--accent-text);
   white-space: nowrap;
 }
 .card:hover .card-cta { text-decoration: underline; }
@@ -325,7 +326,7 @@ section { padding: 48px 0; }
   font-size: 13px;
   color: var(--text-mute);
 }
-.card-link:hover { color: var(--accent); text-decoration: none; }
+.card-link:hover { color: var(--accent-text); text-decoration: none; }
 
 /* ---------- Get-started call-to-action panel ---------- */
 .cta-panel {
@@ -343,7 +344,7 @@ section { padding: 48px 0; }
 .cta-panel .cta-copy { min-width: 220px; }
 .cta-panel .cta-copy h3 { margin: 0 0 5px; font-size: 18px; }
 .cta-panel .cta-copy p { margin: 0; color: var(--text-dim); font-size: 14px; line-height: 1.5; }
-.cta-btn {
+.cta-panel .cta-btn {
   font-family: var(--mono);
   font-size: 14px;
   font-weight: 600;
@@ -354,7 +355,7 @@ section { padding: 48px 0; }
   color: #fff;
   white-space: nowrap;
 }
-.cta-btn:hover { text-decoration: none; filter: brightness(1.08); }
+.cta-panel .cta-btn:hover { text-decoration: none; filter: brightness(1.08); }
 
 /* ---------- Buy-me-a-coffee ---------- */
 .coffee {
@@ -370,7 +371,7 @@ section { padding: 48px 0; }
 }
 .coffee-copy { min-width: 240px; font-size: 14px; color: var(--text-dim); line-height: 1.55; }
 .coffee-copy strong { color: var(--text); }
-.coffee-btn {
+.coffee .coffee-btn {
   font-family: var(--mono);
   font-size: 13.5px;
   font-weight: 600;
@@ -381,7 +382,7 @@ section { padding: 48px 0; }
   background: var(--bg-soft);
   white-space: nowrap;
 }
-.coffee-btn:hover { border-color: var(--warn); color: var(--warn); text-decoration: none; }
+.coffee .coffee-btn:hover { border-color: var(--warn); color: var(--warn); text-decoration: none; }
 
 /* ---------- Footer ---------- */
 footer {
@@ -403,7 +404,7 @@ footer .contact a {
   border-bottom: 1px solid var(--accent);
   padding-bottom: 2px;
 }
-footer .contact a:hover { color: var(--accent); text-decoration: none; }
+footer .contact a:hover { color: var(--accent-text); text-decoration: none; }
 footer .meta {
   font-family: var(--mono);
   font-size: 12.5px;
@@ -426,13 +427,13 @@ footer .meta {
   color: var(--text-dim);
   margin: 40px 0 0;
 }
-.back-link:hover { color: var(--accent); text-decoration: none; }
+.back-link:hover { color: var(--accent-text); text-decoration: none; }
 
 .post-header { padding: 34px 0 30px; border-bottom: 1px solid var(--line); margin-bottom: 40px; }
 .post-kicker {
   font-family: var(--mono);
   font-size: 12.5px;
-  color: var(--accent);
+  color: var(--accent-text);
   letter-spacing: 0.04em;
   margin-bottom: 16px;
 }
@@ -471,7 +472,7 @@ footer .meta {
 .post-body h2 .num {
   font-family: var(--mono);
   font-size: 15px;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-right: 12px;
 }
 .post-body h3 {
@@ -482,10 +483,10 @@ footer .meta {
 }
 .post-body p { color: var(--text-dim); margin: 0 0 18px; }
 .post-body strong { color: var(--text); font-weight: 600; }
-.post-body a { color: var(--accent); }
+.post-body a { color: var(--accent-text); }
 .post-body ul, .post-body ol { color: var(--text-dim); padding-left: 22px; margin: 0 0 20px; }
 .post-body li { margin: 0 0 9px; }
-.post-body li::marker { color: var(--accent); }
+.post-body li::marker { color: var(--accent-text); }
 
 .post-body code {
   font-family: var(--mono);
@@ -524,7 +525,7 @@ footer .meta {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-bottom: 7px;
 }
 
@@ -656,7 +657,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
 .stat .n {
   font-family: var(--mono);
   font-size: 24px;
-  color: var(--accent);
+  color: var(--accent-text);
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -678,7 +679,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
   gap: 16px;
 }
 .post-foot .links { display: flex; gap: 8px; }
-.link-btn {
+a.link-btn {
   font-family: var(--mono);
   font-size: 12.5px;
   padding: 7px 14px;
@@ -687,7 +688,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
   color: var(--text-dim);
   transition: all .15s;
 }
-.link-btn:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+a.link-btn:hover { border-color: var(--accent); color: var(--accent-text); text-decoration: none; }
 .link-btn[aria-disabled="true"] {
   opacity: .45;
   cursor: not-allowed;
@@ -752,7 +753,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
 .fw-item .fw-chip {
   font-family: var(--mono);
   font-size: 10.5px;
-  color: var(--accent);
+  color: var(--accent-text);
   border: 1px solid var(--line-soft);
   border-radius: 999px;
   padding: 2px 8px;
@@ -790,7 +791,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
 .fw-detail .fw-project {
   font-family: var(--mono);
   font-size: 12.5px;
-  color: var(--accent);
+  color: var(--accent-text);
   margin-bottom: 16px;
 }
 .fw-detail .fw-desc { color: var(--text-dim); font-size: 15px; margin: 0 0 20px; }
@@ -816,7 +817,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
   position: relative; padding-left: 22px; font-size: 14.5px; color: var(--text-dim);
 }
 .hw-list li::before {
-  content: "▪"; position: absolute; left: 2px; color: var(--accent);
+  content: "▪"; position: absolute; left: 2px; color: var(--accent-text);
 }
 
 .fw-notes {
@@ -856,7 +857,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
   height: 21px;
   border-radius: 50%;
   border: 1px solid var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 600;
@@ -866,7 +867,7 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
 }
 .fw-notes .note-label {
   display: block; font-family: var(--mono); font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px;
+  letter-spacing: 0.08em; color: var(--accent-text); margin-bottom: 6px;
 }
 
 /* flash action row */
