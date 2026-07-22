@@ -17,6 +17,7 @@
       <nav class="links">
         <a href="index.html#work">work</a>
         <a href="index.html#about">about</a>
+        <a href="projects/inclinometer-manual.html">guide</a>
         <a href="flash.html">flash</a>
         <a href="index.html#contact">contact</a>
       </nav>
@@ -85,8 +86,17 @@
           'USB-C cable',
           'A second node, if you want differential readings'
         ],
-        notes: 'Everything installs in one pass — no separate filesystem upload. Saved settings survive: your role, zero, and thresholds persist across a reflash. If the port never appears, hold BtnB while tapping reset to force the ROM bootloader.',
-        manifest: 'firmware/angle-gauge/manifest.json'
+        notes: 'Everything installs in one pass — no separate filesystem upload. Saved settings survive: your role, zero, and thresholds persist across a reflash. If flashing won’t start or no port appears, work through “Can’t connect?” below.',
+        troubleshoot: [
+          'Fully power the node off first. It has an internal battery, so unplugging USB does not stop it — the old firmware keeps running and holds the serial port. Hold the power button (~6 seconds) until the screen goes dark, then reconnect USB and flash.',
+          'Force the ROM bootloader: hold the BOOT (G0) button while plugging in USB, then release it once powered on. The chip is now in download mode — a dark screen is normal — so click Flash and pick the port.',
+          'Use a data-capable USB-C cable plugged straight into the computer, not a hub and not a charge-only cable.',
+          'Close anything else using the port — M5Burner, Arduino IDE, PlatformIO, or any open serial monitor.',
+          'On macOS, install the WCH CH9102 / CH34x USB-to-serial driver if the port never shows up in the picker.'
+        ],
+        // Firmware bin + manifest are sourced from the project repo (single source of truth).
+        manifest: 'https://raw.githubusercontent.com/jdieringer/f3a-angle-gauge/main/dist/manifest.json',
+        repo: 'https://github.com/jdieringer/f3a-angle-gauge'
       }
     ];
 
@@ -128,10 +138,17 @@
         '<div class="fw-metaline">' +
           '<span class="k">Chip: <b>' + esc(fw.chip) + '</b></span>' +
           '<span class="k">Version: <b>' + esc(fw.version) + '</b></span>' +
+          (fw.repo ? '<span class="k">Source: <a href="' + esc(fw.repo) + '">GitHub ↗</a></span>' : '') +
         '</div>' +
         '<div class="hw-head">What you need</div>' +
         '<ul class="hw-list">' + hw + '</ul>' +
         '<div class="fw-notes"><span class="note-label">Before you flash</span>' + esc(fw.notes) + '</div>' +
+        (fw.troubleshoot && fw.troubleshoot.length
+          ? '<div class="hw-head">Can’t connect?</div>' +
+            '<ol class="trouble-list">' +
+              fw.troubleshoot.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') +
+            '</ol>'
+          : '') +
         '<div class="flash-action" id="flash-action"></div>';
 
       var action = document.getElementById('flash-action');

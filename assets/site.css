@@ -319,6 +319,42 @@ section { padding: 48px 0; }
   white-space: nowrap;
 }
 .card:hover .card-cta { text-decoration: underline; }
+.card-ctas { display: flex; align-items: center; gap: 18px; white-space: nowrap; }
+.card-link {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-mute);
+}
+.card-link:hover { color: var(--accent); text-decoration: none; }
+
+/* ---------- Get-started call-to-action panel ---------- */
+.cta-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 26px;
+  border: 1px solid var(--accent);
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin: 30px 0;
+}
+.cta-panel .cta-copy { min-width: 220px; }
+.cta-panel .cta-copy h3 { margin: 0 0 5px; font-size: 18px; }
+.cta-panel .cta-copy p { margin: 0; color: var(--text-dim); font-size: 14px; line-height: 1.5; }
+.cta-btn {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 9px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  white-space: nowrap;
+}
+.cta-btn:hover { text-decoration: none; filter: brightness(1.08); }
 
 /* ---------- Footer ---------- */
 footer {
@@ -765,6 +801,41 @@ table.spec td:first-child { color: var(--text); font-family: var(--mono); font-s
   font-size: 13.5px;
   color: var(--text-dim);
   margin: 0 0 24px;
+}
+
+/* numbered troubleshooting steps */
+.trouble-list {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 0 0 24px;
+  display: grid;
+  gap: 11px;
+}
+.trouble-list li {
+  position: relative;
+  counter-increment: step;
+  padding-left: 32px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.trouble-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .fw-notes .note-label {
   display: block; font-family: var(--mono); font-size: 11px; text-transform: uppercase;

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angle Gauge — User Guide · Jon Dieringer</title>
+  <meta name="description" content="User guide for the F3A Setup Tools Angle Gauge: what it is, how to set up a pair of M5StickS3 nodes, take differential readings, and use the phone console." />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%90%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="../assets/site.css?v=2" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../index.html">jon<span class="dot">.</span>dieringer</a>
+      <nav class="links">
+        <a href="../index.html#work">work</a>
+        <a href="../index.html#about">about</a>
+        <a href="inclinometer-manual.html">guide</a>
+        <a href="../flash.html">flash</a>
+        <a href="../index.html#contact">contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="post">
+    <div class="wrap post-wrap">
+      <a class="back-link" href="../index.html#work">← Back</a>
+
+      <header class="post-header">
+        <div class="post-kicker">User guide · F3A Setup Tools</div>
+        <h1>Angle Gauge</h1>
+        <p class="post-summary">
+          What it is and how to use it. A set of small wireless nodes that clip to an aircraft and
+          read the angle between two surfaces — incidence, decalage, control throws, differential —
+          to about 0.01°, without ever leveling the aircraft.
+        </p>
+        <div class="post-meta">
+          <span>M5StickS3 · ESP32-S3 · BMI270</span>
+          <span class="dot-sep">·</span>
+          <span>Version 1.0</span>
+        </div>
+        <div class="post-tags">
+          <span class="chip">Getting started</span>
+          <span class="chip">Setup</span>
+          <span class="chip">Measuring</span>
+          <span class="chip">Phone console</span>
+        </div>
+      </header>
+
+      <article class="post-body">
+
+        <div class="cta-panel">
+          <div class="cta-copy">
+            <h3>Want to get started?</h3>
+            <p>Flash the firmware to each node straight from your browser — no toolchain, no app store.</p>
+          </div>
+          <a class="cta-btn" href="../flash.html">Flash a node →</a>
+        </div>
+
+        <h2>What it is</h2>
+        <p>
+          The Angle Gauge is a fleet of identical little nodes — each an M5StickS3 with a screen, a
+          battery, and a motion sensor. Every node measures its own tilt against gravity and
+          broadcasts it. Clip one to the wing and one to the stabilizer and a node shows you the
+          <strong>difference</strong> between them directly.
+        </p>
+        <p>
+          That difference is the whole point. Because both nodes feel the same gravity, whatever
+          attitude the fuselage happens to be sitting at cancels out — so <strong>the aircraft never
+          needs to be leveled</strong> to measure decalage, incidence, control throws, washout, or
+          symmetry. It resolves to roughly 0.01°, about 10–30× finer than a hobby angle meter (a
+          Robart analog reads to 0.125°; digital angle cubes to about ±0.2°).
+        </p>
+        <p>
+          There is no master and no hub. Every node runs the same firmware, self-assigns a role
+          (A, B, C…), and any node can put up a phone console on demand. Want the engineering behind
+          it? See the <a href="inclinometer.html">design notes</a>.
+        </p>
+
+        <h2>What you need</h2>
+        <ul>
+          <li><strong>Two or more M5StickS3 nodes</strong> — ESP32-S3, 1.14" LCD, speaker, 250 mAh
+            LiPo, with the Bosch BMI270 IMU built in. One node works for a single absolute angle; two
+            or more unlock differential readings.</li>
+          <li><strong>A USB-C cable</strong> to charge and to flash.</li>
+          <li><strong>A Chromium-based desktop browser</strong> (Chrome, Edge, or Opera) for the
+            one-time flash. A phone is optional — only needed if you want the web console.</li>
+        </ul>
+
+        <h2>Getting started</h2>
+        <ol>
+          <li><strong>Flash each node.</strong> Plug a node in, open the
+            <a href="../flash.html">flash page</a>, and install the firmware. Repeat for every node —
+            they all get the same image. Settings survive a reflash.</li>
+          <li><strong>Power them on together.</strong> The first node to boot claims role
+            <strong>A</strong>, the next <strong>B</strong>, and so on. Roles stick (they're saved on
+            the device), so a node keeps its letter across power cycles.</li>
+          <li><strong>Let them warm up.</strong> For best-case accuracy, give a cold node about 15
+            minutes before precision work.</li>
+        </ol>
+
+        <div class="note">
+          <span class="note-label">The one habit that matters</span>
+          Zero your nodes shortly <em>before</em> you measure, not hours ahead. The sensor's zero
+          drifts slowly with temperature, so a fresh zero is what keeps you at 0.01°. Everything
+          below is built around that.
+        </div>
+
+        <h2>Take a differential reading</h2>
+        <p>
+          The typical job — say decalage between wing and stabilizer:
+        </p>
+        <ol>
+          <li><strong>Pair-zero first.</strong> Sit both nodes flat on one true surface and run
+            <strong>Match 0</strong> (from the console Setup screen, or the on-device match). This
+            cancels the fixed offset between the two units — the dominant error in differential work.</li>
+          <li><strong>Clip them on.</strong> One node on each surface you're comparing.</li>
+          <li><strong>Wait for green.</strong> Each node runs a
+            <span class="mono">MOVING → SETTLING → STABLE</span> cycle. Grey means it's moving, yellow
+            means it's settling, <strong>green means the reading is trustworthy</strong>. Hold still
+            and let it reach green.</li>
+          <li><strong>Read the difference.</strong> Pick one node as the datum; the other shows the
+            live angle between them. The aircraft can sit however it likes.</li>
+        </ol>
+
+        <div class="note">
+          <span class="note-label">How the precision arrives</span>
+          When a surface stops moving the node starts averaging fresh samples, and precision improves
+          the longer it sits still — about 0.005° after 2 seconds, 0.002° after 8. It caps the
+          averaging automatically, so waiting longer than a few seconds past green doesn't help.
+        </div>
+
+        <h2>The three measuring modes</h2>
+        <p>
+          Most rigging measurements are a combination of three primitives — set from the phone
+          console (and mirrored on every node's screen):
+        </p>
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead><tr><th>Mode</th><th>What it shows</th><th>Use it for</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Live</strong></td><td>Each node's own absolute tilt</td><td>A single angle — dihedral, a surface against a level bench</td></tr>
+              <tr><td><strong>Tare</strong></td><td>Zeroes now; then shows change from that zero (NET)</td><td>Control throws — zero at neutral, then read the deflection</td></tr>
+              <tr><td><strong>Δ Datum</strong></td><td>Live difference of every node against a chosen reference node</td><td>Decalage, incidence, washout, L/R symmetry</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>On-device buttons</h2>
+        <p>
+          You can do the common things without a phone at all:
+        </p>
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead><tr><th>Button</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Front (BtnA)</strong> — press</td><td>Tare: first press arms it, then it zeroes at the next stable reading. Press again to clear.</td></tr>
+              <tr><td><strong>Side (BtnB)</strong> — short press</td><td>Cycle which other node you're reading the difference against.</td></tr>
+              <tr><td><strong>Side (BtnB)</strong> — long press (1.5 s)</td><td>Turn the phone console (Wi-Fi hotspot) on or off.</td></tr>
+              <tr><td><strong>Side (BtnB)</strong> — held while powering on</td><td>Reset a stuck role and re-assign from scratch.</td></tr>
+              <tr><td><strong>Power (side)</strong></td><td>Sleep / power the node off now.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>The phone console</h2>
+        <p>
+          For the full set of measurements — and a nicer interface — any node can host a small web app:
+        </p>
+        <ol>
+          <li><strong>Long-press the side button (BtnB)</strong> on any node to start its hotspot.</li>
+          <li><strong>Join the Wi-Fi network</strong> named <span class="mono">F3A Angle Gauge</span>
+            from your phone.</li>
+          <li><strong>Open</strong> <span class="mono">http://192.168.4.1</span>. It usually pops up on
+            its own. On iPhone you can use <em>Add to Home Screen</em> to keep it one tap away.</li>
+        </ol>
+        <p>
+          The console has two areas. <strong>Measure</strong> gives you the three modes above plus
+          about two dozen ready-made measurements built on them — rigging (decalage, incidence,
+          washout, symmetry, dihedral, thrust line), throws (endpoints, differential ratio, L/R match,
+          rates, flaps), and helicopter setups — along with auto-capture that grabs a reading each
+          time a surface settles and chirps. <strong>Setup</strong> holds <strong>Match 0</strong>
+          (the pair-zero) and the motion/settle thresholds.
+        </p>
+        <div class="figure shot">
+          <img src="../assets/angle-gauge-console.jpg" width="880" height="689"
+               alt="The Angle Gauge web console showing Live mode with sensor A stable at plus 0.395 degrees." />
+          <figcaption>The console in Live mode, opened from a phone.</figcaption>
+        </div>
+
+        <h2>Accuracy tips</h2>
+        <ul>
+          <li>Everything is in degrees.</li>
+          <li>Zero shortly before measuring; allow ~15 minutes of warm-up after a cold power-on.</li>
+          <li>A node weighs about 20 g, enough to deflect a light surface — if in doubt, do a ballast
+            test to see whether it moves.</li>
+          <li>For incidence, your accuracy is limited by the chord-line fixture you clip to, not the
+            electronics.</li>
+        </ul>
+
+        <h2>Power &amp; battery</h2>
+        <ul>
+          <li><strong>Auto power-off</strong> after about 3 minutes idle (with a 10-second on-screen
+            countdown first) — the pair counts as "in use" while <em>either</em> node is moving.</li>
+          <li><strong>Wake</strong> a slept node with its power button; role and zero are remembered,
+            tare and datum reset.</li>
+          <li><strong>Battery %</strong> shows bottom-left; a cyan <span class="mono">+</span> means
+            it's plugged in.</li>
+        </ul>
+
+        <h2>Troubleshooting</h2>
+        <div class="tbl-scroll">
+          <table class="spec">
+            <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+            <tbody>
+              <tr><td>Flasher says "Failed to initialize"</td><td>Fully power the node off (hold the power button ~6 s — it has a battery, so unplugging USB isn't enough), then retry. See the <a href="../flash.html">flash page</a> for the full checklist.</td></tr>
+              <tr><td>Two nodes don't see each other</td><td>Make sure both are flashed with the same firmware and powered on together. If a role looks stuck, hold the side button (BtnB) while powering the node on to re-assign.</td></tr>
+              <tr><td>Console shows stale numbers after a reflash</td><td>Refresh the web app (or remove and re-add it to your Home Screen) — the cached copy keeps calling the old version.</td></tr>
+              <tr><td>Reading won't settle to green</td><td>The surface (or the bench) is still moving, or the node is being nudged. Steady it and wait; drafts and a bumped table are common culprits.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cta-panel">
+          <div class="cta-copy">
+            <h3>Ready to try it?</h3>
+            <p>Flash a node from your browser and pair it with a second one for differential readings.</p>
+          </div>
+          <a class="cta-btn" href="../flash.html">Flash a node →</a>
+        </div>
+
+        <div class="post-foot">
+          <a class="back-link" href="../index.html#work" style="margin:0">← Back</a>
+          <div class="links">
+            <a class="link-btn" href="../flash.html">Flash a node</a>
+            <a class="link-btn" href="inclinometer.html">Design notes</a>
+            <a class="link-btn" href="https://github.com/jdieringer/f3a-angle-gauge">Repo</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script src="../assets/site.js?v=2"></script>
+</body>
+</html>
